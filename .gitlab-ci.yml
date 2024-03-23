@@ -61,7 +61,7 @@ deploy:
     - echo "$ENV" > .env
 
     # Get the API key from the backend and add it to the .env file
-    - API_KEY="$(ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web && ../vendor/bin/drush sql:query "SELECT api_key FROM users_field_data WHERE name='GraphQL API';")"
+    - API_KEY="$(ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web && ../vendor/bin/drush sql:query \"SELECT api_key FROM users_field_data WHERE name='GraphQL API';\"")"
     - sed -e "s/BACKEND_API_KEY=\".*/BACKEND_API_KEY=\"$API_KEY\"/" -i .env
 
     # Install
