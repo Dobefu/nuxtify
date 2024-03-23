@@ -22,6 +22,7 @@ default:
     - chmod 0700 ~/.ssh
     - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
     - chmod 0600 ~/.ssh/id_rsa
+    - ssh-keyscan -v "$SSH_HOST"
     - ssh-keyscan "$SSH_HOST" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - apt update
