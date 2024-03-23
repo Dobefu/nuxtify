@@ -50,8 +50,9 @@ deploy:
     - rsync -avhz --delete config "$SSH_USER"@"[$SSH_HOST]":"$BACKEND_DIR"
     - rsync -avhz --delete composer.json "$SSH_USER"@"[$SSH_HOST]":"$BACKEND_DIR"
     - ssh "$SSH_USER"@"$SSH_HOST" -T "rm -f $BACKEND_DIR/web/core/install.php"
-    - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web/sites/default && chmod ugo-w ."
+    - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web/sites/default && chmod ugo+w ."
     - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web && ../vendor/bin/drush site:install nuxtify -y --site-name="Nuxtify" --account-name=root"
+    - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web/sites/default && chmod ugo-w ."
 
     # Navigate to the frontend directory
     - cd frontend
