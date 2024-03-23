@@ -1,0 +1,79 @@
+image: node:20.11.0
+
+variables:
+  DEBIAN_FRONTEND: noninteractive
+  FRONTEND_DIR: /var/www/nuxtify.connor.nl
+  BACKEND_DIR: /var/www/backend-nuxtify.connor.nl/build
+  LANG: en_US.UTF-8
+  LANGUAGE: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+
+default:
+  before_script:
+    # Setup locale
+    - apt update
+    - apt install locales -y
+    - echo "en_US UTF-8" > /etc/locale.gen
+    - locale-gen en_US.UTF-8
+
+    # Setup SSH
+    - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh
+    - chmod 0700 ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_rsa
+    - chmod 0600 ~/.ssh/id_rsa
+    - ssh-keyscan "$SSH_HOST" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - apt update
+    - apt install rsync -y
+
+    # Setup PHP
+    - wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+    - apt install -y lsb-release
+    - echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
+    - apt update
+    - apt install -y php8.3-{apcu,bcmath,cli,common,curl,dom,gd,intl,mbstring,mcrypt,mysql,opcache,xmlrpc,zip}
+
+deploy:
+  stage: deploy
+  script:
+    # Deploy backend
+    - ../composer/composer.phar install --no-dev
+    - ssh "$SSH_USER"@"$SSH_HOST" -T "mkdir -p $BACKEND_DIR"
+    - rsync -avhz --delete --exclude-from=.rsyncignore web "$SSH_USER"@"[$SSH_HOST]":"$BACKEND_DIR"
+    - rsync -avhz --delete vendor "$SSH_USER"@"[$SSH_HOST]":"$BACKEND_DIR"
+    - rsync -avhz --delete config "$SSH_USER"@"[$SSH_HOST]":"$BACKEND_DIR"
+    - rsync -avhz --delete composer.json "$SSH_USER"@"[$SSH_HOST]":"$BACKEND_DIR"
+    - ssh "$SSH_USER"@"$SSH_HOST" -T "rm -f $BACKEND_DIR/web/core/install.php"
+    - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web/sites/default && chmod ugo-w ."
+    - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web && ../vendor/bin/drush site:install nuxtify -y --site-name="Nuxtify" --account-name=root"
+
+    # Navigate to the frontend directory
+    - cd frontend
+
+    # Add .env file
+    - echo "$ENV" > .env
+
+    # Get the API key from the backend and add it to the .env file
+    - API_KEY="$(ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web && ../vendor/bin/drush sql:query "SELECT api_key FROM users_field_data WHERE name='GraphQL API';")"
+    - sed -e "s/BACKEND_API_KEY=\".*/BACKEND_API_KEY=\"$API_KEY\"/" -i .env
+
+    # Install
+    - npm install
+
+    # Lint
+    - npm run lint
+
+    # Build
+    - npm run build
+
+    # Deploy frontend
+    - rsync -avhz --delete .nuxt "$SSH_USER"@"[$SSH_HOST]":"$FRONTEND_DIR"
+    - rsync -avhz --delete .nvmrc "$SSH_USER"@"[$SSH_HOST]":"$FRONTEND_DIR"
+    - rsync -avhz --delete .output "$SSH_USER"@"[$SSH_HOST]":"$FRONTEND_DIR"
+    - rsync -avhz --delete .env "$SSH_USER"@"[$SSH_HOST]":"$FRONTEND_DIR"
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "feat/ci"
+    - when: always
+    - allow_failure: false

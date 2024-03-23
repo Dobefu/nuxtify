@@ -1,0 +1,11 @@
+sites/default/settings.php
+sites/default/files
+sites/default/services.local.yml
+sites/default/drush.yml
+core/install.php
+analyse.html
+README.md
+README.txt
+
+.git
+.gitignore
