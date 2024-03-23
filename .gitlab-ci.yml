@@ -8,10 +8,15 @@ variables:
   LANGUAGE: en_US.UTF-8
   LC_ALL: en_US.UTF-8
 
+tags:
+  - gitlab-org
+
 default:
   before_script:
-    # Setup locale
+    # Update package list
     - apt update
+
+    # Setup locale
     - apt install locales -y
     - echo "en_US UTF-8" > /etc/locale.gen
     - locale-gen en_US.UTF-8
@@ -24,14 +29,12 @@ default:
     - chmod 0600 ~/.ssh/id_rsa
     - ssh-keyscan "$SSH_HOST" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - apt update
-    - apt install rsync -y
+    - apt install -y rsync
 
     # Setup PHP
     - wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
     - apt install -y lsb-release
     - echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list
-    - apt update
     - apt install -y php8.3-{apcu,bcmath,cli,common,curl,dom,gd,intl,mbstring,mcrypt,mysql,opcache,xmlrpc,zip}
 
 deploy:
