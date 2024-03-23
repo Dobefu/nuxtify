@@ -81,6 +81,9 @@ deploy:
     - rsync -avhz --delete .output "$SSH_USER"@"[$SSH_HOST]":"$FRONTEND_DIR"
     - rsync -avhz --delete .env "$SSH_USER"@"[$SSH_HOST]":"$FRONTEND_DIR"
 
+    # Reload the PM2 process for the frontend
+    - ssh "$SSH_USER"@"$SSH_HOST" -T "pm2 reload nuxtify_frontend"
+
   rules:
     - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "feat/ci"
     - when: always
