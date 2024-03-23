@@ -1,6 +1,6 @@
-#import "~/queries/fragments/metatags/metatagLink.fragment.gql"
-#import "~/queries/fragments/metatags/metatagValue.fragment.gql"
-#import "~/queries/fragments/metatags/metatagProperty.fragment.gql"
+#import "~/queries/fragments/metatags/metaTagLink.fragment.gql"
+#import "~/queries/fragments/metatags/metaTagValue.fragment.gql"
+#import "~/queries/fragments/metatags/metaTagProperty.fragment.gql"
 
 #import "~/queries/fragments/paragraphs/paragraphLayout.fragment.gql"
 #import "~/queries/fragments/paragraphs/paragraphTitle.fragment.gql"
