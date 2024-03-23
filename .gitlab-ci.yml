@@ -61,7 +61,8 @@ deploy:
     - sed -e "s/BACKEND_API_KEY=\".*/BACKEND_API_KEY=\"$API_KEY\"/" -i .env
 
     # Install
-    - npm install
+    - npm install --global pnpm
+    - pnpm install
 
     # Lint
     - npm run lint
