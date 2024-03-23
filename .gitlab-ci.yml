@@ -39,8 +39,11 @@ default:
 deploy:
   stage: deploy
   script:
+    # Download Composer
+    - ./scripts/get-composer.sh
+
     # Deploy backend
-    - ../composer/composer.phar install --no-dev
+    - ./scripts/composer.phar install --no-dev
     - ssh "$SSH_USER"@"$SSH_HOST" -T "mkdir -p $BACKEND_DIR"
     - rsync -avhz --delete --exclude-from=.rsyncignore web "$SSH_USER"@"[$SSH_HOST]":"$BACKEND_DIR"
     - rsync -avhz --delete vendor "$SSH_USER"@"[$SSH_HOST]":"$BACKEND_DIR"
