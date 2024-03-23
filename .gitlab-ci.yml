@@ -8,10 +8,9 @@ variables:
   LANGUAGE: en_US.UTF-8
   LC_ALL: en_US.UTF-8
 
-tags:
-  - gitlab-org
-
 default:
+  tags:
+    - gitlab-org
   before_script:
     # Update package list
     - apt update
