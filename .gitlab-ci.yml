@@ -52,6 +52,8 @@ deploy:
     - ssh "$SSH_USER"@"$SSH_HOST" -T "rm -f $BACKEND_DIR/web/core/install.php"
     - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web/sites/default && chmod ugo+w ."
     - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web && ../vendor/bin/drush site:install nuxtify -y --site-name="Nuxtify" --account-name=root"
+    - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web && ../vendor/bin/drush user:password root "$(openssl rand -base64 "$(shuf -i 24-48 -n 1)")"
+    openssl rand -base64 "$(shuf -i 24-48 -n 1)" | ../vendor/bin/drush user:password root -
     - ssh "$SSH_USER"@"$SSH_HOST" -T "cd $BACKEND_DIR/web/sites/default && chmod ugo-w ."
 
     # Navigate to the frontend directory
